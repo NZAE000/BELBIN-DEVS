@@ -1,0 +1,58 @@
+[
+    {
+        "nombre": "Juan",
+        "codigo": "1",
+        "personalidad1": "Finalizador",
+        "personalidad2": "Cohesionador",
+        "porcentaje1": 0.6,
+        "porcentaje2": 0.4
+    },
+    {
+        "nombre": "Maria",
+        "codigo": "2",
+        "personalidad1": "Especialista",
+        "personalidad2": "Implementador",
+        "porcentaje1": 0.81,
+        "porcentaje2": 0.2
+    },
+    {
+        "nombre": "Charlot",
+        "codigo": "3",
+        "personalidad1": "Coordinador",
+        "personalidad2": "Especialista",
+        "porcentaje1": 0.82,
+        "porcentaje2": 0.28
+    },
+    {
+        "nombre": "Antonio",
+        "codigo": "4",
+        "personalidad1": "Coordinador",
+        "personalidad2": "Cerebro",
+        "porcentaje1": 0.5,
+        "porcentaje2": 0.45
+    },
+    {
+        "nombre": "Marcelo",
+        "codigo": "5",
+        "personalidad1": "Impulsor",
+        "personalidad2": "Implementador",
+        "porcentaje1": 0.80,
+        "porcentaje2": 0.3
+    },    
+    {
+        "nombre": "Joel",
+        "codigo": "6",
+        "personalidad1": "Cerebro",
+        "personalidad2": "Finalizador",
+        "porcentaje1": 0.26,
+        "porcentaje2": 0.45
+    },
+	{
+	    "nombre": "Karina",
+	    "codigo": "7",
+	    "personalidad1": "Impulsor",
+	    "personalidad2": "Investigador de Recursos",
+	    "porcentaje1": 0.51,
+	    "porcentaje2": 0.67
+	}
+]
