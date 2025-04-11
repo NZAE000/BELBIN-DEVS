@@ -24,8 +24,9 @@ public class Persona extends ViewableAtomic {
 	}
 
 	private static double tiempoTranscurrido = 0.0;
-	private static final double total_time_simulation = 500;
-	private static HashMap<String, Map<String, Integer>> frecuencies = new HashMap<>();
+	private static final double total_time_simulation = 3000;
+	public static int limit_to = 0;
+	public static HashMap<String, Map<String, Integer>> frecuencies = new HashMap<>();
 	private static HashMap<String, Double> speak_time_accumulator = new HashMap<>();
 	private static ArrayList<SpeakTime> speaks_time = new ArrayList<>();
 	private boolean escuchando;
@@ -55,7 +56,7 @@ public class Persona extends ViewableAtomic {
         this.personasEnGrupo = personasEnGrupo;
 
         LeerArchivoJSON lectorJSON = new LeerArchivoJSON();
-        String rutaArchivo = "Personas.JSON";
+        String rutaArchivo = "Personas.json";
         lectorJSON.leerArchivoJSON(rutaArchivo);
         List<Archivo> archivos = lectorJSON.getArchivos();
         this.numPersonas = archivos.size();
@@ -115,7 +116,7 @@ public class Persona extends ViewableAtomic {
     public message out() {
     	//System.out.println("\nName from: " + this.name);
         message m = new message();
-        List<String> personasCompatibles = evaluarsiguientepersona(this.Nombre, 6, this.Personalidad1,this.Personalidad2,this.Porcentaje1,this.Porcentaje2);
+        List<String> personasCompatibles = evaluarsiguientepersona(this.Nombre, limit_to, this.Personalidad1,this.Personalidad2,this.Porcentaje1,this.Porcentaje2);
         String nombreCompanero = obtenerNombrePersonaAleatoria(obtenerNombresMejoresCompatibilidades(personasCompatibles));
         //System.out.println("List: " + personasCompatibles);
         //System.out.println("Choose: " + nombreCompanero);
@@ -171,17 +172,22 @@ public class Persona extends ViewableAtomic {
     
     private void showFrecuency()
     {
-    	for (Map.Entry<String, Map<String, Integer>> entry : frecuencies.entrySet()) {
-            String clavePrincipal = entry.getKey();
-            Map<String, Integer> mapaInternoActual = entry.getValue();
+    	for (Map.Entry<String, Map<String, Integer>> entry : Persona.frecuencies.entrySet()) {
+            String name = entry.getKey();
+            System.out.print("\t" + name);
+        }
+        System.out.println();
+        for (Map.Entry<String, Map<String, Integer>> entry : Persona.frecuencies.entrySet()) {
+            String from = entry.getKey();
+            System.out.print(from);
+            Map<String, Integer> to = entry.getValue();
 
-            System.out.println("FROM: " + clavePrincipal);
-
-            for (Map.Entry<String, Integer> entryInterno : mapaInternoActual.entrySet()) {
-                String claveInterna = entryInterno.getKey();
-                Integer valorInterno = entryInterno.getValue();
-                System.out.println(" " + claveInterna + " : " + valorInterno);
+            for (Map.Entry<String, Integer> entryInterno : to.entrySet()) {
+                //String claveInterna = entryInterno.getKey();
+                Integer hz = entryInterno.getValue();
+                System.out.print("\t" + hz);
             }
+            System.out.println();
         }
     }
     
@@ -202,7 +208,7 @@ public class Persona extends ViewableAtomic {
     private void show_speak_time() 
     {
     	 if(tiempoTranscurrido > total_time_simulation) {
-    		 System.out.println("Name\tSpeaking time");
+    		 System.out.println("\nName\tSpeaking time");
     		 //for (Map.Entry<String, Double> entry : speak_time_accumulator.entrySet()) 
     		 //{
     		//	 String speaker_name = entry.getKey();
@@ -245,7 +251,7 @@ public class Persona extends ViewableAtomic {
 	public boolean puedeIniciarConversacion() {
         double mayorPorcentaje = 0.0;
         LeerArchivoJSON lectorJSON = new LeerArchivoJSON();
-        String rutaArchivo = "Personas.JSON";
+        String rutaArchivo = "Personas.json";
         lectorJSON.leerArchivoJSON(rutaArchivo);
         List<Archivo> archivos = lectorJSON.getArchivos();
 
@@ -280,6 +286,264 @@ public class Persona extends ViewableAtomic {
 	    Map<String, Double> tiemposDeHablaAdicionales = new HashMap<>();
 
 	    // Combinaciones de personalidades
+	    
+	    // 1
+	    /*
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Finalizador ", 3.0);
+    	tiemposDeHablaAdicionales.put("Cohesionador-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Cohesionador", 2.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Coordinador", 4.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Investigador de Recursos", 5.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Finalizador ", 3.0);
+	   	tiemposDeHablaAdicionales.put("Especialista-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Finalizador ", 3.0);
+	    //*/
+	    
+	    // 2
+	    /*
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Finalizador ", 3.0);
+    	tiemposDeHablaAdicionales.put("Cohesionador-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Cohesionador", 2.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Coordinador", 4.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Investigador de Recursos", 5.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Finalizador ", 3.0);
+	   	tiemposDeHablaAdicionales.put("Especialista-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Finalizador ", 3.0);
+	    //*/
+	    
+	    // 3
+	    /*
+	 	tiemposDeHablaAdicionales.put("Investigador de Recursos-Investigador de Recursos", 1.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Cohesionador", 2.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Finalizador ", 3.0);
+    	tiemposDeHablaAdicionales.put("Cohesionador-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Cohesionador-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Coordinador-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Cohesionador", 2.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Coordinador", 4.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Cerebro-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Investigador de Recursos", 5.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Finalizador ", 3.0);
+	   	tiemposDeHablaAdicionales.put("Especialista-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Especialista-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Impulsor-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Impulsor", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Implementador", 3.0);
+	    tiemposDeHablaAdicionales.put("Implementador-Finalizador ", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Investigador de Recursos", 2.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Cohesionador", 1.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Coordinador", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Cerebro", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Monitor Evaluador", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Especialista", 3.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Impulsor", 2.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Implementador", 1.0);
+	    tiemposDeHablaAdicionales.put("Finalizador-Finalizador ", 4.0); 
+	    //*/
+	    
+	    // 4
+	    ///*
 	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Investigador de Recursos", 1.0);
 	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Cohesionador", 2.0);
 	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Coordinador", 3.0);
@@ -361,90 +625,7 @@ public class Persona extends ViewableAtomic {
 	    tiemposDeHablaAdicionales.put("Finalizador-Impulsor", 2.0);
 	    tiemposDeHablaAdicionales.put("Finalizador-Implementador", 1.0);
 	    tiemposDeHablaAdicionales.put("Finalizador-Finalizador ", 4.0);
-	    /*
-	     
-	     tiemposDeHablaAdicionales.put("Investigador de Recursos-Investigador de Recursos", 2.0);
-	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Cohesionador", 1.0);
-	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Coordinador", 3.0);
-	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Cerebro", 3.0);
-	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Monitor Evaluador", 3.0);
-	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Especialista", 3.0);
-	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Impulsor", 3.0);
-	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Implementador", 3.0);
-	    tiemposDeHablaAdicionales.put("Investigador de Recursos-Finalizador ", 3.0);
-    	tiemposDeHablaAdicionales.put("Cohesionador-Investigador de Recursos", 2.0);
-	    tiemposDeHablaAdicionales.put("Cohesionador-Cohesionador", 1.0);
-	    tiemposDeHablaAdicionales.put("Cohesionador-Coordinador", 3.0);
-	    tiemposDeHablaAdicionales.put("Cohesionador-Cerebro", 3.0);
-	    tiemposDeHablaAdicionales.put("Cohesionador-Monitor Evaluador", 3.0);
-	    tiemposDeHablaAdicionales.put("Cohesionador-Especialista", 3.0);
-	    tiemposDeHablaAdicionales.put("Cohesionador-Impulsor", 3.0);
-	    tiemposDeHablaAdicionales.put("Cohesionador-Implementador", 3.0);
-	    tiemposDeHablaAdicionales.put("Cohesionador-Finalizador ", 3.0);
-	    tiemposDeHablaAdicionales.put("Coordinador-Investigador de Recursos", 2.0);
-	    tiemposDeHablaAdicionales.put("Coordinador-Cohesionador", 1.0);
-	    tiemposDeHablaAdicionales.put("Coordinador-Coordinador", 3.0);
-	    tiemposDeHablaAdicionales.put("Coordinador-Cerebro", 3.0);
-	    tiemposDeHablaAdicionales.put("Coordinador-Monitor Evaluador", 3.0);
-	    tiemposDeHablaAdicionales.put("Coordinador-Especialista", 3.0);
-	    tiemposDeHablaAdicionales.put("Coordinador-Impulsor", 3.0);
-	    tiemposDeHablaAdicionales.put("Coordinador-Implementador", 3.0);
-	    tiemposDeHablaAdicionales.put("Coordinador-Finalizador ", 3.0);
-	    tiemposDeHablaAdicionales.put("Cerebro-Investigador de Recursos", 2.0);
-	    tiemposDeHablaAdicionales.put("Cerebro-Cohesionador", 2.0);
-	    tiemposDeHablaAdicionales.put("Cerebro-Coordinador", 4.0);
-	    tiemposDeHablaAdicionales.put("Cerebro-Cerebro", 3.0);
-	    tiemposDeHablaAdicionales.put("Cerebro-Monitor Evaluador", 3.0);
-	    tiemposDeHablaAdicionales.put("Cerebro-Especialista", 3.0);
-	    tiemposDeHablaAdicionales.put("Cerebro-Impulsor", 3.0);
-	    tiemposDeHablaAdicionales.put("Cerebro-Implementador", 3.0);
-	    tiemposDeHablaAdicionales.put("Cerebro-Finalizador ", 3.0);
-	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Investigador de Recursos", 5.0);
-	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Cohesionador", 1.0);
-	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Coordinador", 3.0);
-	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Cerebro", 3.0);
-	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Monitor Evaluador", 3.0);
-	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Especialista", 3.0);
-	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Impulsor", 3.0);
-	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Implementador", 3.0);
-	    tiemposDeHablaAdicionales.put("Monitor Evaluador-Finalizador ", 3.0);
-	   	tiemposDeHablaAdicionales.put("Especialista-Investigador de Recursos", 2.0);
-	    tiemposDeHablaAdicionales.put("Especialista-Cohesionador", 1.0);
-	    tiemposDeHablaAdicionales.put("Especialista-Coordinador", 3.0);
-	    tiemposDeHablaAdicionales.put("Especialista-Cerebro", 3.0);
-	    tiemposDeHablaAdicionales.put("Especialista-Monitor Evaluador", 3.0);
-	    tiemposDeHablaAdicionales.put("Especialista-Especialista", 3.0);
-	    tiemposDeHablaAdicionales.put("Especialista-Impulsor", 3.0);
-	    tiemposDeHablaAdicionales.put("Especialista-Implementador", 3.0);
-	    tiemposDeHablaAdicionales.put("Especialista-Finalizador ", 3.0);
-	    tiemposDeHablaAdicionales.put("Impulsor-Investigador de Recursos", 2.0);
-	    tiemposDeHablaAdicionales.put("Impulsor-Cohesionador", 1.0);
-	    tiemposDeHablaAdicionales.put("Impulsor-Coordinador", 3.0);
-	    tiemposDeHablaAdicionales.put("Impulsor-Cerebro", 3.0);
-	    tiemposDeHablaAdicionales.put("Impulsor-Monitor Evaluador", 3.0);
-	    tiemposDeHablaAdicionales.put("Impulsor-Especialista", 3.0);
-	    tiemposDeHablaAdicionales.put("Impulsor-Impulsor", 3.0);
-	    tiemposDeHablaAdicionales.put("Impulsor-Implementador", 3.0);
-	    tiemposDeHablaAdicionales.put("Impulsor-Finalizador ", 3.0);
-	    tiemposDeHablaAdicionales.put("Implementador-Investigador de Recursos", 2.0);
-	    tiemposDeHablaAdicionales.put("Implementador-Cohesionador", 1.0);
-	    tiemposDeHablaAdicionales.put("Implementador-Coordinador", 3.0);
-	    tiemposDeHablaAdicionales.put("Implementador-Cerebro", 3.0);
-	    tiemposDeHablaAdicionales.put("Implementador-Monitor Evaluador", 3.0);
-	    tiemposDeHablaAdicionales.put("Implementador-Especialista", 3.0);
-	    tiemposDeHablaAdicionales.put("Implementador-Impulsor", 3.0);
-	    tiemposDeHablaAdicionales.put("Implementador-Implementador", 3.0);
-	    tiemposDeHablaAdicionales.put("Implementador-Finalizador ", 3.0);
-	    tiemposDeHablaAdicionales.put("Finalizador-Investigador de Recursos", 2.0);
-	    tiemposDeHablaAdicionales.put("Finalizador-Cohesionador", 1.0);
-	    tiemposDeHablaAdicionales.put("Finalizador-Coordinador", 3.0);
-	    tiemposDeHablaAdicionales.put("Finalizador-Cerebro", 3.0);
-	    tiemposDeHablaAdicionales.put("Finalizador-Monitor Evaluador", 3.0);
-	    tiemposDeHablaAdicionales.put("Finalizador-Especialista", 3.0);
-	    tiemposDeHablaAdicionales.put("Finalizador-Impulsor", 3.0);
-	    tiemposDeHablaAdicionales.put("Finalizador-Implementador", 3.0);
-	    tiemposDeHablaAdicionales.put("Finalizador-Finalizador ", 3.0);
-	     * */
+	    //*/
 
 	    double tiempoDeHabla = 0.0;
 	    double promedioPorcentajes = (Porcentaje1 + Porcentaje2) / 2.0;
@@ -478,7 +659,7 @@ public class Persona extends ViewableAtomic {
 
 	    return listaNombres.get(index);
 	}
-	public List<String> evaluarsiguientepersona(String personaQueHabla,int limite, String per1,String per2 ,double P1,double P2) {
+	public List<String> evaluarsiguientepersona(String personaQueHabla, int limite, String per1,String per2 ,double P1,double P2) {
 	    Map<String, Double> Compatibilidad = new HashMap<>();
 	    Compatibilidad.put("Investigador de Recursos-Investigador de Recursos", 1.0);
 	    Compatibilidad.put("Investigador de Recursos-Cohesionador", 1.0);
@@ -564,7 +745,7 @@ public class Persona extends ViewableAtomic {
 
 
 	    LeerArchivoJSON lectorJSON = new LeerArchivoJSON();
-	    String rutaArchivo = "Personas.JSON";
+	    String rutaArchivo = "Personas.json";
 	    lectorJSON.leerArchivoJSON(rutaArchivo);
 	    List<Archivo> archivos = lectorJSON.getArchivos();
 
@@ -576,7 +757,7 @@ public class Persona extends ViewableAtomic {
 	        if (nombrePersona.equals(personaQueHabla)) {
 	            continue;
 	        }
-	        System.out.println("aca: " + nombrePersona + "\n");
+	        
 	        String personalidadPersona1 = archivo.getPersonalidad1();
 	        String personalidadPersona2 = archivo.getPersonalidad2();
 	        double porcentajePersona1 = archivo.getPorcentaje1();
@@ -605,7 +786,7 @@ public class Persona extends ViewableAtomic {
 
 
 	    if (personasConCompatibilidad.size() > limite) {
-	        personasConCompatibilidad = personasConCompatibilidad.subList(0, limite);
+	        personasConCompatibilidad = personasConCompatibilidad.subList(0, limite-1);
 	    }
 
 	    return personasConCompatibilidad;

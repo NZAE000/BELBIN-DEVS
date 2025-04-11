@@ -1,0 +1,180 @@
+	Karina	Marcelo	Juan	Maria	Antonio	Charlot	Joel
+Karina	0	3	1	3	1	0	3
+Marcelo	0	0	2	2	3	2	1
+Juan	3	1	0	0	4	2	2
+Maria	1	1	2	0	0	2	3
+Antonio	3	4	3	1	0	2	1
+Charlot	2	1	2	2	2	0	1
+Joel	2	0	2	1	5	1	0
+
+Name	Speaking time
+Charlot	36.300000000000004
+
+Maria	33.33
+
+Juan	30.0
+
+Charlot	36.300000000000004
+
+Maria	33.33
+
+Charlot	36.300000000000004
+
+Antonio	32.775
+
+Karina	38.940000000000005
+
+Maria	33.33
+
+Juan	30.0
+
+Joel	22.365
+
+Antonio	32.775
+
+Juan	30.0
+
+Karina	38.940000000000005
+
+Maria	33.33
+
+Joel	22.365
+
+Karina	38.940000000000005
+
+Juan	30.0
+
+Antonio	32.775
+
+Marcelo	36.300000000000004
+
+Antonio	32.775
+
+Juan	30.0
+
+Marcelo	36.300000000000004
+
+Antonio	32.775
+
+Marcelo	36.300000000000004
+
+Joel	22.365
+
+Antonio	32.775
+
+Marcelo	36.300000000000004
+
+Juan	30.0
+
+Antonio	32.775
+
+Karina	38.940000000000005
+
+Marcelo	36.300000000000004
+
+Antonio	32.775
+
+Charlot	36.300000000000004
+
+Karina	38.940000000000005
+
+Marcelo	36.300000000000004
+
+Charlot	36.300000000000004
+
+Juan	30.0
+
+Karina	38.940000000000005
+
+Joel	22.365
+
+Antonio	32.775
+
+Charlot	36.300000000000004
+
+Antonio	32.775
+
+Maria	33.33
+
+Joel	22.365
+
+Maria	33.33
+
+Charlot	36.300000000000004
+
+Karina	38.940000000000005
+
+Maria	33.33
+
+Karina	38.940000000000005
+
+Joel	22.365
+
+Juan	30.0
+
+Charlot	36.300000000000004
+
+Joel	22.365
+
+Juan	30.0
+
+Antonio	32.775
+
+Juan	30.0
+
+Karina	38.940000000000005
+
+Joel	22.365
+
+Antonio	32.775
+
+Karina	38.940000000000005
+
+Marcelo	36.300000000000004
+
+Maria	33.33
+
+Marcelo	36.300000000000004
+
+Charlot	36.300000000000004
+
+Marcelo	36.300000000000004
+
+Maria	33.33
+
+Joel	22.365
+
+Charlot	36.300000000000004
+
+Juan	30.0
+
+Joel	22.365
+
+Karina	38.940000000000005
+
+Antonio	32.775
+
+Marcelo	36.300000000000004
+
+Juan	30.0
+
+Antonio	32.775
+
+Joel	22.365
+
+Total	2519.1750000000006
+
+Name	Speaking percentage
+Karina	0.17133600000000002
+
+Marcelo	0.14520000000000002
+
+Juan	0.144
+
+Maria	0.11998799999999997
+
+Antonio	0.18353999999999995
+
+Charlot	0.14520000000000002
+
+Joel	0.09840600000000002

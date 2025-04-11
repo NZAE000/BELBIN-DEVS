@@ -1,0 +1,73 @@
+FROM: Marcelo
+ Juan : 1
+FROM: Juan
+ Marcelo : 1
+ Antonio : 3
+ Charlot : 2
+FROM: Antonio
+ Charlot : 2
+ Joel : 1
+FROM: Maria
+ Juan : 1
+ Charlot : 1
+FROM: Charlot
+ Juan : 4
+ Joel : 1
+FROM: Joel
+ Maria : 2
+ 
+ 
+Name	Speaking time
+Charlot	30.800000000000004
+
+Juan	25.5
+
+Marcelo	30.800000000000004
+
+Juan	25.5
+
+Antonio	28.025
+
+Joel	19.169999999999998
+
+Maria	28.28
+
+Charlot	30.800000000000004
+
+Joel	19.169999999999998
+
+Maria	28.28
+
+Juan	25.5
+
+Charlot	30.800000000000004
+
+Juan	25.5
+
+Charlot	30.800000000000004
+
+Juan	25.5
+
+Antonio	28.025
+
+Charlot	30.800000000000004
+
+Juan	25.5
+
+Antonio	28.025
+
+Total	516.775
+
+
+Name	Speaking percentage
+Marcelo	0.06160000000000001
+
+Juan	0.306
+
+Antonio	0.16814999999999997
+
+Maria	0.11312
+
+Charlot	0.30800000000000005
+
+Joel	0.07668

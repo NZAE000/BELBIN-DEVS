@@ -1,0 +1,87 @@
+	Marcelo	Juan	Maria	Antonio	Charlot	Joel
+Marcelo	0	4	2	1	1	0
+Juan	4	0	1	1	1	1
+Maria	0	5	0	0	0	0
+Antonio	2	0	0	0	1	2
+Charlot	0	0	1	2	0	0
+Joel	2	0	0	1	0	0
+
+Name	Speaking time
+Maria	31.31
+
+Juan	31.0
+
+Marcelo	34.1
+
+Maria	31.31
+
+Juan	31.0
+
+Maria	31.31
+
+Juan	31.0
+
+Marcelo	34.1
+
+Juan	31.0
+
+Joel	23.075
+
+Antonio	30.875
+
+Marcelo	34.1
+
+Juan	31.0
+
+Charlot	34.1
+
+Antonio	30.875
+
+Joel	23.075
+
+Marcelo	34.1
+
+Antonio	30.875
+
+Joel	23.075
+
+Marcelo	34.1
+
+Juan	31.0
+
+Marcelo	34.1
+
+Charlot	34.1
+
+Antonio	30.875
+
+Marcelo	34.1
+
+Maria	31.31
+
+Juan	31.0
+
+Marcelo	34.1
+
+Juan	31.0
+
+Antonio	30.875
+
+Charlot	34.1
+
+Maria	31.31
+
+Total	1003.2500000000001
+
+Name	Speaking percentage
+Marcelo	0.2728
+
+Juan	0.248
+
+Maria	0.15655
+
+Antonio	0.154375
+
+Charlot	0.10230000000000002
+
+Joel	0.069225

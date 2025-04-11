@@ -1,0 +1,148 @@
+	Karina	Marcelo	Juan	Maria	Antonio	Charlot	Joel
+Karina	0	3	1	0	2	1	0
+Marcelo	0	0	4	1	0	1	2
+Juan	3	1	0	1	3	3	1
+Maria	0	2	3	0	4	0	1
+Antonio	1	1	2	2	0	3	1
+Charlot	2	1	2	4	0	0	0
+Joel	1	0	1	2	1	0	0
+
+Name	Speaking time
+Charlot	36.300000000000004
+
+Juan	30.0
+
+Antonio	32.775
+
+Maria	33.33
+
+Antonio	32.775
+
+Juan	30.0
+
+Karina	38.940000000000005
+
+Antonio	32.775
+
+Juan	30.0
+
+Antonio	32.775
+
+Marcelo	36.300000000000004
+
+Juan	30.0
+
+Marcelo	36.300000000000004
+
+Charlot	36.300000000000004
+
+Karina	38.940000000000005
+
+Marcelo	36.300000000000004
+
+Juan	30.0
+
+Charlot	36.300000000000004
+
+Juan	30.0
+
+Karina	38.940000000000005
+
+Antonio	32.775
+
+Charlot	36.300000000000004
+
+Karina	38.940000000000005
+
+Marcelo	36.300000000000004
+
+Joel	22.365
+
+Juan	30.0
+
+Charlot	36.300000000000004
+
+Maria	33.33
+
+Marcelo	36.300000000000004
+
+Joel	22.365
+
+Antonio	32.775
+
+Charlot	36.300000000000004
+
+Maria	33.33
+
+Juan	30.0
+
+Charlot	36.300000000000004
+
+Maria	33.33
+
+Juan	30.0
+
+Joel	22.365
+
+Karina	38.940000000000005
+
+Juan	30.0
+
+Karina	38.940000000000005
+
+Marcelo	36.300000000000004
+
+Maria	33.33
+
+Antonio	32.775
+
+Charlot	36.300000000000004
+
+Maria	33.33
+
+Joel	22.365
+
+Maria	33.33
+
+Marcelo	36.300000000000004
+
+Juan	30.0
+
+Maria	33.33
+
+Antonio	32.775
+
+Joel	22.365
+
+Maria	33.33
+
+Juan	30.0
+
+Antonio	32.775
+
+Maria	33.33
+
+Antonio	32.775
+
+Karina	38.940000000000005
+
+Charlot	36.300000000000004
+
+Marcelo	36.300000000000004
+
+Total	2022.5549999999996
+
+Name	Speaking percentage
+Karina	0.13629000000000002
+
+Marcelo	0.14520000000000002
+
+Juan	0.18
+
+Antonio	0.16387499999999997
+
+Maria	0.16664999999999994
+
+Charlot	0.16335000000000002
+
+Joel	0.0559125

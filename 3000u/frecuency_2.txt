@@ -1,0 +1,239 @@
+	Marcelo	Juan	Maria	Antonio	Charlot	Joel
+Marcelo	0	2	4	4	3	5
+Juan	5	0	2	3	3	4
+Maria	2	6	0	3	5	3
+Antonio	2	5	6	0	3	2
+Charlot	8	2	5	3	0	2
+Joel	1	3	2	5	5	0
+
+Name	Speaking time
+Charlot	30.800000000000004
+
+Juan	28.0
+
+Joel	20.945
+
+Juan	28.0
+
+Joel	20.945
+
+Juan	28.0
+
+Antonio	28.025
+
+Charlot	30.800000000000004
+
+Antonio	28.025
+
+Maria	28.28
+
+Charlot	30.800000000000004
+
+Antonio	28.025
+
+Maria	28.28
+
+Marcelo	30.800000000000004
+
+Maria	28.28
+
+Antonio	28.025
+
+Charlot	30.800000000000004
+
+Marcelo	30.800000000000004
+
+Antonio	28.025
+
+Juan	28.0
+
+Maria	28.28
+
+Juan	28.0
+
+Maria	28.28
+
+Charlot	30.800000000000004
+
+Marcelo	30.800000000000004
+
+Joel	20.945
+
+Charlot	30.800000000000004
+
+Maria	28.28
+
+Marcelo	30.800000000000004
+
+Juan	28.0
+
+Marcelo	30.800000000000004
+
+Antonio	28.025
+
+Juan	28.0
+
+Marcelo	30.800000000000004
+
+Antonio	28.025
+
+Charlot	30.800000000000004
+
+Maria	28.28
+
+Antonio	28.025
+
+Maria	28.28
+
+Joel	20.945
+
+Maria	28.28
+
+Charlot	30.800000000000004
+
+Maria	28.28
+
+Juan	28.0
+
+Joel	20.945
+
+Charlot	30.800000000000004
+
+Marcelo	30.800000000000004
+
+Charlot	30.800000000000004
+
+Antonio	28.025
+
+Maria	28.28
+
+Juan	28.0
+
+Marcelo	30.800000000000004
+
+Charlot	30.800000000000004
+
+Marcelo	30.800000000000004
+
+Joel	20.945
+
+Marcelo	30.800000000000004
+
+Joel	20.945
+
+Juan	28.0
+
+Marcelo	30.800000000000004
+
+Maria	28.28
+
+Juan	28.0
+
+Joel	20.945
+
+Antonio	28.025
+
+Juan	28.0
+
+Antonio	28.025
+
+Maria	28.28
+
+Joel	20.945
+
+Maria	28.28
+
+Charlot	30.800000000000004
+
+Marcelo	30.800000000000004
+
+Joel	20.945
+
+Antonio	28.025
+
+Marcelo	30.800000000000004
+
+Charlot	30.800000000000004
+
+Joel	20.945
+
+Charlot	30.800000000000004
+
+Marcelo	30.800000000000004
+
+Antonio	28.025
+
+Marcelo	30.800000000000004
+
+Maria	28.28
+
+Antonio	28.025
+
+Juan	28.0
+
+Antonio	28.025
+
+Juan	28.0
+
+Charlot	30.800000000000004
+
+Marcelo	30.800000000000004
+
+Joel	20.945
+
+Antonio	28.025
+
+Maria	28.28
+
+Joel	20.945
+
+Antonio	28.025
+
+Joel	20.945
+
+Charlot	30.800000000000004
+
+Maria	28.28
+
+Juan	28.0
+
+Charlot	30.800000000000004
+
+Juan	28.0
+
+Marcelo	30.800000000000004
+
+Maria	28.28
+
+Charlot	30.800000000000004
+
+Joel	20.945
+
+Antonio	28.025
+
+Joel	20.945
+
+Charlot	30.800000000000004
+
+Marcelo	30.800000000000004
+
+Juan	28.0
+
+Charlot	30.800000000000004
+
+Maria	28.28
+
+Total	3023.2900000000036
+
+Name	Speaking percentage
+Marcelo	0.18480000000000002
+
+Juan	0.15866666666666668
+
+Antonio	0.16814999999999994
+
+Maria	0.1791066666666666
+
+Charlot	0.20533333333333334
+
+Joel	0.11170666666666665
