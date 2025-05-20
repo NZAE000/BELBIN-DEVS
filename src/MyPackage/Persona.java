@@ -12,37 +12,41 @@ import GenCol.*;
 
 public class Persona extends ViewableAtomic {
 	
-	public class SpeakTime{
+	public class SpeakTime {
 		
 		SpeakTime(String nm, Double t_e){
-				this.name = nm;
-				this.time_elapse = t_e;
+			this.name = nm;
+			this.time_elapse = t_e;
 		}
 		
 		public String name;
-		Double time_elapse;
+		public Double time_elapse;
 	}
 
-	private static double tiempoTranscurrido = 0.0;
-	private static final double total_time_simulation = 3000;
-	public static int limit_to = 0;
-	public static HashMap<String, Map<String, Integer>> frecuencies = new HashMap<>();
-	private static HashMap<String, Double> speak_time_accumulator = new HashMap<>();
-	private static ArrayList<SpeakTime> speaks_time = new ArrayList<>();
-	private boolean escuchando;
-    private boolean hablando;
+	private static double tiempoTranscurrido          				 = 0.0;
+	private static final double total_time_simulation 				 = 500;
+	public  static int limit_to 				      				 = 0;
+	public  static HashMap<String, Map<String, Integer>> frecuencies = new HashMap<>();
+	private static HashMap<String, Double> speak_time_accumulator    = new HashMap<>();
+	private static ArrayList<SpeakTime> speaks_time 				 = new ArrayList<>();
+	
     private String Nombre;
     private String Personalidad1;
     private String Personalidad2;
     private double Porcentaje1;
     private double Porcentaje2;
-    private int numPersonas; 
+	private boolean escuchando;
+    private boolean hablando;
+    
+    //private int numPersonas;
     private List<String> personalidadesDelGrupo = new ArrayList<>();
-    private List<Persona> personasEnGrupo = new ArrayList<>();
-    private List<String> nombresMejoresCompatibilidades = new ArrayList<>();
+    private List<Persona> personasEnGrupo       = new ArrayList<>();
+    private double tiempoHabladoAcumulado       = 0.0;
+   
+    //private List<String> nombresMejoresCompatibilidades = new ArrayList<>();
 
     boolean mensajeGenerado = false;
-    CSVWriter csvWriter = new CSVWriter("resultados.csv");
+    CSVWriter csvWriter     = new CSVWriter("resultados.csv");
     
     public Persona(String Nombre, String Personalidad1, String Personalidad2, double Porcentaje1, double Porcentaje2, List<String> personalidadesDelGrupo, List<Persona> personasEnGrupo) {
         super(Nombre);
@@ -54,27 +58,27 @@ public class Persona extends ViewableAtomic {
         this.Porcentaje2 = Porcentaje2;
         this.personalidadesDelGrupo = personalidadesDelGrupo;
         this.personasEnGrupo = personasEnGrupo;
-
-        LeerArchivoJSON lectorJSON = new LeerArchivoJSON();
-        String rutaArchivo = "Personas.json";
-        lectorJSON.leerArchivoJSON(rutaArchivo);
-        List<Archivo> archivos = lectorJSON.getArchivos();
-        this.numPersonas = archivos.size();
-        
-        for (Archivo archivo : archivos) {
-            String nombrePersona = archivo.getNombre();
-
-            if (!nombrePersona.equals(Nombre)) {
-                addInport("Inport " + nombrePersona);
-                addOutport("Outport " + nombrePersona);
-            }
-        }
     }
-    private double tiempoHabladoAcumulado = 0.0;
+    
+    public List<String> getPersonalidadesDelGrupo() { return this.personalidadesDelGrupo; }
+    public List<Persona> getPersons() { return this.personasEnGrupo; }
+    public String getName() 		 { return this.Nombre;   }
+    public String getPersonalidad1() { return Personalidad1; }
+    public String getPersonalidad2() { return Personalidad2; }
+    public double getPorcentaje1()   { return Porcentaje1;   }
+    public double getPorcentaje2()   { return Porcentaje2;   }
+    
+    
+    @Override
+    public String toString() {
+        return "Person [nombre=" + Nombre + ", personalidad1=" + Personalidad1
+                + ", personalidad2=" + Personalidad2 + ", porcentaje1=" + Porcentaje1 + ", porcentaje2=" + Porcentaje2 + "]";
+    }
 
     @Override
     public void initialize() {
     	
+    	System.out.println("Aca");
         escuchando = true;
         hablando = false;
 
@@ -90,6 +94,30 @@ public class Persona extends ViewableAtomic {
             holdIn("Hablando", tiempoDeHabla); 
         }
         super.initialize();
+    }
+    
+    @Override
+    public void deltext(double e, message x) {
+        if(tiempoTranscurrido > total_time_simulation) {
+        	System.out.println("----------------------------------------");
+        	passivate();
+        	showInteractionFrecuency();
+        	showSpeakTime();
+        	showSpeakTimeRate();
+        	tiempoTranscurrido=0.0;
+        	System.out.println("-");
+        	//this.initialize();
+        }
+        else {
+	    	//System.out.println(this.Nombre+" deltext()");
+	        Continue(e);
+	        if (x.getLength() > 0) {
+	        	double tiempoDeHabla = calcularTiempoDeHabla(personalidadesDelGrupo);
+	            hablando = true;
+	            escuchando = false;
+	            holdIn("Hablando", tiempoDeHabla);
+	        }
+        }
     }
     
     @Override
@@ -112,6 +140,7 @@ public class Persona extends ViewableAtomic {
             escuchando = true;
         }
     }
+    
     @Override
     public message out() {
     	//System.out.println("\nName from: " + this.name);
@@ -120,11 +149,13 @@ public class Persona extends ViewableAtomic {
         String nombreCompanero = obtenerNombrePersonaAleatoria(obtenerNombresMejoresCompatibilidades(personasCompatibles));
         //System.out.println("List: " + personasCompatibles);
         //System.out.println("Choose: " + nombreCompanero);
-        if (hablando && !mensajeGenerado && !nombreCompanero.isEmpty()) {
+        if (hablando && !mensajeGenerado && !nombreCompanero.isEmpty()) 
+        {
             double tiempoDeHabla = calcularTiempoDeHabla(personalidadesDelGrupo);
-            compute_speaking_time_hz(this.Nombre, tiempoDeHabla);
+            accumulate_speaking_time_hz(this.Nombre, tiempoDeHabla);
             add_speaking_time(new SpeakTime(this.Nombre, tiempoDeHabla));
             tiempoTranscurrido += tiempoDeHabla;
+            
             if (!nombreCompanero.isEmpty()) {
                 String puertoSalida = "Outport " + nombreCompanero;
                 m.add(makeContent(puertoSalida, new entity("Toma tu turno de hablar")));
@@ -133,28 +164,18 @@ public class Persona extends ViewableAtomic {
                 // FRECUENCY!
                 compute_comunication_hz(this.Nombre, nombreCompanero);
                 //showFrecuency();
-            }
-            
+            }   
         }
-
         return m;
     }
     
     private void add_speaking_time(SpeakTime speaktime)
     {
-    	//if (!speak_time_accumulator.containsKey(from))
-    	//	speak_time_accumulator.put(from, 0.0);
-    	//else {
-    		//speak_time_accumulator.put(from, speak_time_accumulator.getOrDefault(from, 0.0) + speak_time_lapse);
-    	//}
-    	
     	speaks_time.add(speaktime);
-    	
     }
     
-    private void compute_speaking_time_hz(String from, Double speak_time_lapse)
+    private void accumulate_speaking_time_hz(String from, Double speak_time_lapse)
     {
-
     	speak_time_accumulator.put(from, speak_time_accumulator.getOrDefault(from, 0.0) + speak_time_lapse);
     }
     
@@ -170,7 +191,7 @@ public class Persona extends ViewableAtomic {
         frecuency.put(to, frecuency.getOrDefault(to, 0) + 1);
     }
     
-    private void showFrecuency()
+    private void showInteractionFrecuency()
     {
     	for (Map.Entry<String, Map<String, Integer>> entry : Persona.frecuencies.entrySet()) {
             String name = entry.getKey();
@@ -191,10 +212,10 @@ public class Persona extends ViewableAtomic {
         }
     }
     
-    private void show_speak_timeFrecuency() 
+    private void showSpeakTimeRate() 
     {
     	 if(tiempoTranscurrido > total_time_simulation) {
-    		 System.out.println("Name\tSpeaking percentage");
+    		 System.out.println("Name\tSpeaking rate");
     		 for (Map.Entry<String, Double> entry : speak_time_accumulator.entrySet()) 
     		 {
     			 String speaker_name = entry.getKey();
@@ -205,7 +226,7 @@ public class Persona extends ViewableAtomic {
     	 }
     }
     
-    private void show_speak_time() 
+    private void showSpeakTime() 
     {
     	 if(tiempoTranscurrido > total_time_simulation) {
     		 System.out.println("\nName\tSpeaking time");
@@ -225,46 +246,26 @@ public class Persona extends ViewableAtomic {
     		 //speaks_time.forEach( (speaktime) -> { System.out.println(speaktime.name + "\t" + speaktime.time_elapse + "\n"); } );
     	 }
     }
-
-    @Override
-    public void deltext(double e, message x) {
-        if(tiempoTranscurrido > total_time_simulation) {
-        	System.out.println("----------------------------------------");
-        	passivate();
-        	showFrecuency();
-        	show_speak_time();
-        	show_speak_timeFrecuency();
-        	tiempoTranscurrido=0.0;
-        }
-        else {
-	    	//System.out.println(this.Nombre+" deltext()");
-	        Continue(e);
-	        if (x.getLength() > 0) {
-	        	double tiempoDeHabla = calcularTiempoDeHabla(personalidadesDelGrupo);
-	            hablando = true;
-	            escuchando = false;
-	            holdIn("Hablando", tiempoDeHabla);
-	        }
-        }
-    }
     
 	public boolean puedeIniciarConversacion() {
         double mayorPorcentaje = 0.0;
-        LeerArchivoJSON lectorJSON = new LeerArchivoJSON();
-        String rutaArchivo = "Personas.json";
-        lectorJSON.leerArchivoJSON(rutaArchivo);
-        List<Archivo> archivos = lectorJSON.getArchivos();
+        //LeerArchivoJSON lectorJSON = new LeerArchivoJSON();
+        //String rutaArchivo = "Personas.json";
+        //lectorJSON.leerArchivoJSON(rutaArchivo);
+        //List<Archivo> archivos = lectorJSON.getArchivos();
+        
+        //System.out.println("Personas " + getName() + ": " + getPersons().toString());
 
-        for (Archivo archivo : archivos) {
-            String personalidad1 = archivo.getPersonalidad1();
-            String personalidad2 = archivo.getPersonalidad2();
+        for (Persona persona : this.personasEnGrupo) {
+            String personalidad1 = persona.getPersonalidad1();
+            String personalidad2 = persona.getPersonalidad2();
 
             if (("Cohesionador".equals(personalidad1) || "Cohesionador".equals(personalidad2) ||
                  "Coordinador".equals(personalidad1) || "Coordinador".equals(personalidad2) ||
                  "Impulsor".equals(personalidad1) || "Impulsor".equals(personalidad2))) {
                 
-                double porcentaje = archivo.getPorcentaje1();
-                double porcentaje2 = archivo.getPorcentaje2();
+                double porcentaje = persona.getPorcentaje1();
+                double porcentaje2 = persona.getPorcentaje2();
 
                 if (porcentaje > mayorPorcentaje) {
                     mayorPorcentaje = porcentaje;
@@ -744,28 +745,28 @@ public class Persona extends ViewableAtomic {
 	    Compatibilidad.put("Finalizador-Finalizador ", 1.0);
 
 
-	    LeerArchivoJSON lectorJSON = new LeerArchivoJSON();
-	    String rutaArchivo = "Personas.json";
-	    lectorJSON.leerArchivoJSON(rutaArchivo);
-	    List<Archivo> archivos = lectorJSON.getArchivos();
+	    //LeerArchivoJSON lectorJSON = new LeerArchivoJSON();
+	    //String rutaArchivo = "Personas.json";
+	    //lectorJSON.leerArchivoJSON(rutaArchivo);
+	    //List<Archivo> archivos = lectorJSON.getArchivos();
 
 
 	    List<String> personasConCompatibilidad = new ArrayList<>();
 
-	    for (Archivo archivo : archivos) {
-	        String nombrePersona = archivo.getNombre();
-	        if (nombrePersona.equals(personaQueHabla)) {
+	    for (Persona persona : this.personasEnGrupo) {
+	        String nombrePersona = persona.getName();
+	        if (nombrePersona.equals(personaQueHabla)) { // Skip the same person.
 	            continue;
 	        }
 	        
-	        String personalidadPersona1 = archivo.getPersonalidad1();
-	        String personalidadPersona2 = archivo.getPersonalidad2();
-	        double porcentajePersona1 = archivo.getPorcentaje1();
-	        double porcentajePersona2 = archivo.getPorcentaje2();
+	        String personalidadPersona1 = persona.getPersonalidad1();
+	        String personalidadPersona2 = persona.getPersonalidad2();
+	        double porcentajePersona1 = persona.getPorcentaje1();
+	        double porcentajePersona2 = persona.getPorcentaje2();
 	        
 	        double compatibilidadTotal = 0.0;
-	        String combinacion1 =  per1+ "-" + personalidadPersona1;
-	        String combinacion2 =  per2+ "-" + personalidadPersona2;
+	        String combinacion1 =  per1 + "-" + personalidadPersona1;
+	        String combinacion2 =  per2 + "-" + personalidadPersona2;
 	        if (Compatibilidad.containsKey(combinacion1)) {
 	            double compatibilidad1 = Compatibilidad.get(combinacion1);
 	            compatibilidadTotal += compatibilidad1 * porcentajePersona1 * P1;

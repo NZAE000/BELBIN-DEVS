@@ -28,11 +28,9 @@ public class Controller implements ControllerInterface, SimulatorHookListener
    
     public static void main(String[] args)
     {
-
         new Controller();
         System.out.println("Welcome to the DEVS-Suite Simulation Environment!");
         System.out.println("To Begin, Select [Load Model...] From The [File] Menu");
-    
     }
     
     public Controller() 
@@ -51,8 +49,16 @@ public class Controller implements ControllerInterface, SimulatorHookListener
         {
             if (gesture.equals(SIM_RUN_GESTURE)){
                 view.simlationControl(SIM_RUN_GESTURE);
+                
+                System.out.println("Begin");
+                long startTime = System.nanoTime(); // Marca de tiempo inicial
             	simulator.run();
+            	Long endTime = System.nanoTime(); 	// Marca de tiempo final
+                long duration = endTime - startTime; // Duración en nanosegundos
+                System.out.println("End. Finish time: " + (duration / 1_000_000.0) + " ms"); // 4ms for now.
+                
             	Stopwatch.start();
+            	
             }
             else if (gesture.equals(SIM_STEP_GESTURE)){
             	view.simlationControl(SIM_STEP_GESTURE);
