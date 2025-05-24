@@ -9,43 +9,23 @@ import view.modeling.ViewableAtomic;
 import GenCol.*;
 
 
-
 public class Person extends ViewableAtomic {
 	
-	public class SpeakTime {
-		SpeakTime(String nme, Double tElapse){
-			this.name       = nme;
-			this.timeElapse = tElapse;
-		}
-		
-		public String name;
-		public Double timeElapse = 0.0;
-	}
-
-// STATIC MEMBERS ####################################################################
-	private static double ElapsedTime          				 		 = 0.0;
-	private static final double TotalTimeSim 				 		 = 500;
-	public  static HashMap<String, Map<String, Integer>> Frecuencies = new HashMap<>();
-	private static HashMap<String, Double> SpeakTimeAccumulator      = new HashMap<>();
-	private static ArrayList<SpeakTime> SpeaksTime 				 	 = new ArrayList<>();
-
 // ATRIBUTES #########################################################################
-    private String name;
-    private String personality1;
-    private String personality2;
-    private double percentage1 = 0.0;
-    private double percentage2 = 0.0;
-    private List<Person> group = new ArrayList<>();
-    
+    private String name 		   = null;
+    private String personality1    = null;
+    private String personality2    = null;
+    private double percentage1     = 0.0;
+    private double percentage2     = 0.0;
+    private List<Person> group     = null;
 	private boolean listening 	   = false;
     private boolean talking 	   = false;
     boolean generatedMessage       = false;
     private double speakingTime    = 0.0;
     private double accumSpokenTime = 0.0;
-    CSVWriter csvWriter            = new CSVWriter("resultados.csv");
-
+    //CSVWriter csvWriter            = new CSVWriter("resultados.csv");
     
- // CONTRUCTOR #########################################################################
+ // CONSTRUCTOR #########################################################################
     public Person(String name, String personality1, String personality2, double percentage1, double percentage2, List<Person> group) {
         super(name);
         this.name         = name;
@@ -66,7 +46,6 @@ public class Person extends ViewableAtomic {
     public double getTimeSpeak() 	  		{ return this.speakingTime;   }
     public void setTimeSpeak(double speakT) { this.speakingTime = speakT; }
     
-    
     @Override
     public String toString() {
         return "Person [nombre=" + name + ", personality1=" + personality1
@@ -76,7 +55,7 @@ public class Person extends ViewableAtomic {
     @Override
     public void initialize() 
     {
-    	System.out.println("Here");
+    	//System.out.println("Here");
         listening = true;
         talking   = false;
 
@@ -94,17 +73,19 @@ public class Person extends ViewableAtomic {
         super.initialize();
     }
     
+    // DEVS transition methods #####################################################
+    
     @Override
-    public void deltext(double e, message x) {
-        if(ElapsedTime > TotalTimeSim) {
+    public void deltext(double e, message x) 
+    {
+    	//System.out.println("ext");
+        if(GroupCoupled.ElapsedTime > GroupCoupled.TotalTimeSim) {
         	System.out.println("----------------------------------------");
         	passivate();
-        	showInteractionFrecuency();
-        	showSpeakTime();
-        	showSpeakTimeRate();
-        	ElapsedTime = 0.0;
-        	System.out.println("-");
-        	//this.initialize();
+        	GroupCoupled.showInteractionFrecuency();
+        	GroupCoupled.showSpeakTime();
+        	GroupCoupled.showSpeakTimeRate();
+        	GroupCoupled.restoreMetrics(this.group);
         }
         else {
 	    	//System.out.println(this.name+" deltext()");
@@ -119,16 +100,18 @@ public class Person extends ViewableAtomic {
     }
     
     @Override
-    public void deltint() {
-        //System.out.println(this.name + " deltint()");
+    public void deltint() 
+    {
+    	//System.out.println("int");
         double speakingT = calculateSpeakingTime();
         //System.out.println(this.name + ", Tiempo hablado: " + speakingT);
-        String csv_record = this.name + "," + speakingT + "\n";
-        csvWriter.writeToCSV(csv_record);
+        //String csv_record = this.name + "," + speakingT + "\n";
+        //csvWriter.writeToCSV(csv_record);
 
         if (talking) {
             accumSpokenTime += speakingT;
             if (accumSpokenTime >= sigma) {
+            	//System.out.println("Sigma: "+ sigma + ", " + this.name);
                 talking          = false;
                 listening        = true;
                 generatedMessage = false;
@@ -142,103 +125,35 @@ public class Person extends ViewableAtomic {
     @Override
     public message out() 
     {
+    	//System.out.println("out");
         message mssge 				   = new message();
         List<String> compatiblePeoples = evaluateNextPersons();
         String nextSpeakerName         = getRandomPersonName(getBestCompatibleNames(compatiblePeoples));
-        //System.out.println("List: " + compatiblePeople);
+        //System.out.println("List: " + compatiblePeoples);
         //System.out.println("Choose: " + nextSpeakerName);
         if (talking && !generatedMessage && !nextSpeakerName.isEmpty()) 
         {
             double speakingT = calculateSpeakingTime();
-            accumulateSpeakingTimeHz(this.name, speakingT);
-            addSpeakingTime(new SpeakTime(this.name, speakingT));
-            ElapsedTime += speakingT;
+            GroupCoupled.accumulateSpeakingTimeHz(this.name, speakingT);
+            GroupCoupled.addSpeakingTime(this.name, speakingT);
+            GroupCoupled.ElapsedTime += speakingT;
             
             if (!nextSpeakerName.isEmpty()) {
                 String outPort = "Outport " + nextSpeakerName;
                 mssge.add(makeContent(outPort, new entity("Take your turn to speak")));
                 generatedMessage = true;
                 
-                computeComunicationHz(this.name, nextSpeakerName); // FRECUENCY!.
+                GroupCoupled.addComunicationHz(this.name, nextSpeakerName, 1); // FRECUENCY!.
                 //showFrecuency();
             }   
         }
         return mssge;
     }
     
-    private void addSpeakingTime(SpeakTime speaktime) {
-    	SpeaksTime.add(speaktime);
-    }
+    // Helper methods ###############################################################
     
-    private void accumulateSpeakingTimeHz(String from, Double speak_time_lapse) {
-    	SpeakTimeAccumulator.put(from, SpeakTimeAccumulator.getOrDefault(from, 0.0) + speak_time_lapse);
-    }
-    
-    private void computeComunicationHz(String from, String to)
-    {
-    	if (!Frecuencies.containsKey(from))
-    		Frecuencies.put(from, new HashMap<>());
-        
-        Map<String, Integer> frecuency = Frecuencies.get(from); // Get frecuency map 'from'.
-        frecuency.put(to, frecuency.getOrDefault(to, 0) + 1);	// There is no key 'to' in the map, initialize to 0.
-    }
-    
-    private void showInteractionFrecuency()
-    {
-    	for (Map.Entry<String, Map<String, Integer>> entry : Person.Frecuencies.entrySet()) {
-            String name = entry.getKey();
-            System.out.print("\t" + name);
-        }
-        System.out.println();
-        for (Map.Entry<String, Map<String, Integer>> entry : Person.Frecuencies.entrySet()) {
-            String from = entry.getKey();
-            System.out.print(from);
-            Map<String, Integer> to = entry.getValue();
-
-            for (Map.Entry<String, Integer> entryInterno : to.entrySet()) {
-                Integer hz = entryInterno.getValue();
-                System.out.print("\t" + hz);
-            }
-            System.out.println();
-        }
-    }
-    
-    private void showSpeakTimeRate() 
-    {
-    	 if(ElapsedTime > TotalTimeSim) {
-    		 System.out.println("Name\tSpeak rate");
-    		 for (Map.Entry<String, Double> entry : SpeakTimeAccumulator.entrySet()) 
-    		 {
-    			 String speaker_name = entry.getKey();
-    			 Double total_time_speaking = entry.getValue();
-    			 Double percentage = total_time_speaking / TotalTimeSim;
-    			 System.out.println(speaker_name + "\t" + percentage + "\n");
-    		 }
-    	 }
-    }
-    
-    private void showSpeakTime() 
-    {
-    	 if(ElapsedTime > TotalTimeSim) {
-    		 System.out.println("\nName\tSpeak time");
-    		 //for (Map.Entry<String, Double> entry : SpeakTimeAccumulator.entrySet()) 
-    		 //{
-    		//	 String speaker_name = entry.getKey();
-    		//	 Double total_time_speaking = entry.getValue();
-    		//	 Double percentage = total_time_speaking / TotalTimeSim;
-    		//	 System.out.println(speaker_name + "\t" + percentage + "\n");
-    		 //}
-    		 Double total_time = 0.0;
-    		 for (int i = 0; i < SpeaksTime.size(); i++) {
-    			 System.out.println(SpeaksTime.get(i).name + "\t" + SpeaksTime.get(i).timeElapse + "\n");
-    			 total_time += SpeaksTime.get(i).timeElapse;
-			 }
-    		 System.out.println("Total\t" + total_time + "\n");
-    		 //SpeaksTime.forEach( (speaktime) -> { System.out.println(speaktime.name + "\t" + speaktime.timeElapse + "\n"); } );
-    	 }
-    }
-    
-	public boolean canStartConversation() {
+	private boolean canStartConversation() 
+	{
         double highestPercentage = 0.0;
         //LeerArchivoJSON lectorJSON = new LeerArchivoJSON();
         //String rutaArchivo = "Personas.json";
@@ -252,8 +167,8 @@ public class Person extends ViewableAtomic {
             String personality2 = person.getPersonality2();
 
             if (("Cohesionador".equals(personality1) || "Cohesionador".equals(personality2) ||
-                 "Coordinador".equals(personality1) || "Coordinador".equals(personality2) ||
-                 "Impulsor".equals(personality1) || "Impulsor".equals(personality2))) {
+                 "Coordinador".equals(personality1)  || "Coordinador".equals(personality2)  ||
+                 "Impulsor".equals(personality1)     || "Impulsor".equals(personality2))) {
                 
                 double percentage1 = person.getPercentage1();
                 double percentage2 = person.getPercentage2();
@@ -269,30 +184,26 @@ public class Person extends ViewableAtomic {
                 (percentage1 >= highestPercentage   || percentage2 >= highestPercentage);
     }
 	
-	public double calculateSpeakingTime() 
+	private double calculateSpeakingTime() 
 	{
 	    //System.out.println("Tiempo de habla de " + this.name + ": " + this.speakingTime); // Tiempo de habla de Charlot: 36.300000000000004
 	    return this.speakingTime;
 	}
 	
-	private String getRandomPersonName(List<String> names) {
-	    if (names.isEmpty()) {
-	        return "";
-	    }
+	private String getRandomPersonName(List<String> names) 
+	{
+	    if (names.isEmpty()) return "";
 
 	    Random random = new Random();
-	    int index = random.nextInt(names.size());
-
+	    int index     = random.nextInt(names.size());
 	    while (names.get(index).equals(this.name)) {
 	        index = random.nextInt(names.size());
 	    }
-
 	    return names.get(index);
 	}
 	
-	public List<String> evaluateNextPersons() 
+	private List<String> evaluateNextPersons() // TOOODOOOO :C !!!!!!
 	{
-		// TOOODO!
 	    Map<String, Double> compatibilities = new HashMap<>();
 	    compatibilities.put("Investigador de Recursos-Investigador de Recursos", 1.0);
 	    compatibilities.put("Investigador de Recursos-Cohesionador", 1.0);
@@ -403,7 +314,6 @@ public class Person extends ViewableAtomic {
 	            double compatibility2 = compatibilities.get(combination2);
 	            totalCompatibility += compatibility2 * percentage2 * this.percentage2;
 	        }
-	        
 	        nameCompatiblePeoples.add(personName + ": " + totalCompatibility);
 	    }
 
@@ -417,24 +327,21 @@ public class Person extends ViewableAtomic {
 	    if (nameCompatiblePeoples.size() > groupSize-1) {
 	        nameCompatiblePeoples = nameCompatiblePeoples.subList(0, groupSize-2);
 	    }
-
 	    return nameCompatiblePeoples;
 	}
 	
-	public List<String> getBestCompatibleNames(List<String> bestCompatibilities) {
+	private List<String> getBestCompatibleNames(List<String> bestCompatibilities) {
 	    List<String> bestCompatibleNames = new ArrayList<>();
 
 	    for (String element : bestCompatibilities) {
 	        String[] partes = element.split(":");
 	        
 	        if (partes.length == 2) {
-	        	System.out.println("partes: " + partes[0] + " " + partes[1]);
+	        	//System.out.println("partes: " + partes[0] + " " + partes[1]);
 	            String personName = partes[0].trim(); 
 	            bestCompatibleNames.add(personName);
 	        }
 	    }
-
 	    return bestCompatibleNames;
 	}
-	
 }

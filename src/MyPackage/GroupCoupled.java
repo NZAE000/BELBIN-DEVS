@@ -9,12 +9,31 @@ import java.util.Map;
 
 public class GroupCoupled extends ViewableDigraph {
 	
-    public static int GroupSize 		     = 0;
+	public static class SpeakingTime {
+		public SpeakingTime(String nme, Double tElapse) {
+			this.name       = nme;
+			this.timeElapse = tElapse;
+		}
+		public String name       = null;
+		public Double timeElapse = 0.0;
+	}
+	
+	// STATIC MEMBERS ####################################################################
+	public static final double TotalTimeSim = 500;
+	public static double ElapsedTime        = 0.0;
+	public static int GroupSize 		    = 0;
+	// Metrics
+	private static HashMap<String, Map<String, Integer>> Frecuencies = new HashMap<>();
+	private static HashMap<String, Double> SpeakingTimeAccumulator   = new HashMap<>();
+	private static ArrayList<SpeakingTime> SpeakingTimes 			 = new ArrayList<>();
+	
+	// ATRIBUTES #########################################################################
     private List<Person> group               = new ArrayList<>();
     private List<String> groupPersonalities  = new ArrayList<>();
     private List<List<Object>> personalData  = null;
     private Map<String, Double> additionalSpeakingTimes = new HashMap<>();
-    
+ 
+    // CONSTRUCTOR #######################################################################
     public GroupCoupled() {
         super("GroupCoupled");
         initializeModel();
@@ -33,17 +52,16 @@ public class GroupCoupled extends ViewableDigraph {
 		    Arrays.asList(String.class, String.class, String.class, Double.class, Double.class)
 		);
     	
-        int numPerson = personalData.size();
-        GroupSize     = numPerson;
+        int numPerson = GroupSize = personalData.size();
         
         // Init all person atomic models.
         for (int i = 0; i < numPerson; i++) {
-        	List<Object> data    = personalData.get(i);
-        	String name          = data.get(0).toString();
-        	String personality1  = data.get(1).toString();
-        	String personality2  = data.get(2).toString();
-        	double percentaje1   = Double.parseDouble(data.get(3).toString());
-        	double percentaje2   = Double.parseDouble(data.get(4).toString());
+        	List<Object> data   = personalData.get(i);
+        	String name         = data.get(0).toString();
+        	String personality1 = data.get(1).toString();
+        	String personality2 = data.get(2).toString();
+        	double percentaje1  = Double.parseDouble(data.get(3).toString());
+        	double percentaje2  = Double.parseDouble(data.get(4).toString());
             group.add(new Person(
             	name,
             	personality1,
@@ -62,7 +80,7 @@ public class GroupCoupled extends ViewableDigraph {
         }
         
         // Set speak time for all persons
-        for (Person person : group) this.setTimeSpeakOf(person);
+        for (Person person : group) this.setSpeakingTimeOf(person);
         
         // Set in/out ports for all person atomic models.
         for (Person person1 : group) {
@@ -81,33 +99,11 @@ public class GroupCoupled extends ViewableDigraph {
         	//System.out.println("group " + group.get(i).getName() + ": " + group.get(i).getPersons().toString());
         //}
         
-        // Fill matrix frecuency.
-        for (int i = 0; i < numPerson; i++) {
-        	Person.Frecuencies.put(group.get(i).getName(), new HashMap<>());
-        	Map<String, Integer> frecuency = Person.Frecuencies.get(group.get(i).getName());
-        	for (int j = 0; j < numPerson; j++) {
-        		frecuency.put(group.get(j).getName(), 0);
-            }
-        }
+        // Initialize matrix frecuency.
+        initComunicationHz(group);
         
         // Show matrix frecuency.
-        for (Map.Entry<String, Map<String, Integer>> entry : Person.Frecuencies.entrySet()) {
-            String name = entry.getKey();
-            System.out.print("\t" + name);
-        }
-        System.out.println();
-        for (Map.Entry<String, Map<String, Integer>> entry : Person.Frecuencies.entrySet()) {
-            String from = entry.getKey();
-            System.out.print(from);
-            Map<String, Integer> to = entry.getValue();
-
-            for (Map.Entry<String, Integer> entryInterno : to.entrySet()) {
-                //String claveInterna = entryInterno.getKey();
-                Integer hz = entryInterno.getValue();
-                System.out.print("\t" + hz);
-            }
-            System.out.println();
-        }
+        showInteractionFrecuency();
         
         // Establish coupling.
         for (int i = 0; i < numPerson; i++) {
@@ -119,29 +115,6 @@ public class GroupCoupled extends ViewableDigraph {
         }
         //initialize();
     }
-    
-    private void setTimeSpeakOf(Person person) {
-
-	    double speakingTime   = 0.0;
-	    double avgPercentages = (person.getPercentage1() + person.getPercentage2()) / 2.0;
-	    String personality1   = person.getPersonality1();
-	    String personality2   = person.getPersonality2();
-	    
-	    for (String personality : this.groupPersonalities) {
-	        String combination1 = personality1 + "-" + personality;
-	        String combination2 = personality2 + "-" + personality;
-
-	        if (additionalSpeakingTimes.containsKey(combination1)) {
-	            speakingTime += additionalSpeakingTimes.get(combination1);
-	        }
-	        if (additionalSpeakingTimes.containsKey(combination2)) {
-	            speakingTime += additionalSpeakingTimes.get(combination2);
-	        }
-	    }
-	    person.setTimeSpeak(speakingTime*avgPercentages);
-	    System.out.println("Speaking time of " + person.getName() + ": " + person.getTimeSpeak()); // Speaking time of Charlot: 36.300000000000004
-	}
-    
     
     private void initPersonalityTimeSpeak()
     {
@@ -487,4 +460,124 @@ public class GroupCoupled extends ViewableDigraph {
 	    additionalSpeakingTimes.put("Finalizador-Finalizador ", 4.0);
 	    //*/
     }
+    
+    private void setSpeakingTimeOf(Person person) 
+    {
+	    double speakingTime   = 0.0;
+	    double avgPercentages = (person.getPercentage1() + person.getPercentage2()) / 2.0;
+	    String personality1   = person.getPersonality1();
+	    String personality2   = person.getPersonality2();
+	    
+	    for (String personality : this.groupPersonalities) {
+	        String combination1 = personality1 + "-" + personality;
+	        String combination2 = personality2 + "-" + personality;
+
+	        if (additionalSpeakingTimes.containsKey(combination1)) {
+	            speakingTime += additionalSpeakingTimes.get(combination1);
+	        }
+	        if (additionalSpeakingTimes.containsKey(combination2)) {
+	            speakingTime += additionalSpeakingTimes.get(combination2);
+	        }
+	    }
+	    person.setTimeSpeak(speakingTime*avgPercentages);
+	    System.out.println("Speaking time of " + person.getName() + ": " + person.getTimeSpeak()); // Speaking time of Charlot: 36.300000000000004
+	}
+    
+ // Metric methods ################################################################
+    
+    public static void initComunicationHz(List<Person> group)
+    {
+    	Frecuencies.clear();
+    	int numPerson = GroupSize;
+    	for (int i=0; i < numPerson; i++) {
+        	String from = group.get(i).getName();
+			for (int j=0; j < numPerson; j++) {
+				String to = group.get(j).getName();
+				addComunicationHz(from, to, 0);
+			}
+        }
+    }
+    
+    public static void addComunicationHz(String from, String to, int hz)
+    {
+    	if (!Frecuencies.containsKey(from))
+    		Frecuencies.put(from, new HashMap<>());
+        
+        Map<String, Integer> frecuency = Frecuencies.get(from); // Get frecuency map 'from'.
+        frecuency.put(to, frecuency.getOrDefault(to, 0) + hz);	// There is no key 'to' in the map, initialize to 0.
+    }
+	
+ 	 public static void addSpeakingTime(String name, Double time) {
+     	SpeakingTimes.add(new SpeakingTime(name, time));
+     }
+     
+     public static void accumulateSpeakingTimeHz(String from, Double speak_time_lapse) {
+     	SpeakingTimeAccumulator.put(from, SpeakingTimeAccumulator.getOrDefault(from, 0.0) + speak_time_lapse);
+     }
+     
+     public static void showInteractionFrecuency()
+     {
+     	for (Map.Entry<String, Map<String, Integer>> entry : Frecuencies.entrySet()) {
+             String name = entry.getKey();
+             System.out.print("\t" + name);
+         }
+         System.out.println();
+         for (Map.Entry<String, Map<String, Integer>> entry : Frecuencies.entrySet()) {
+             String from = entry.getKey();
+             System.out.print(from);
+             Map<String, Integer> to = entry.getValue();
+
+             for (Map.Entry<String, Integer> entryInterno : to.entrySet()) {
+                 Integer hz = entryInterno.getValue();
+                 System.out.print("\t" + hz);
+             }
+             System.out.println();
+         }
+     }
+     
+     public static void showSpeakTime() 
+     {
+     	 if(ElapsedTime > TotalTimeSim) {
+     		 System.out.println("\nName\tSpeak time");
+     		 //for (Map.Entry<String, Double> entry : SpeakingTimeAccumulator.entrySet()) 
+     		 //{
+     		//	 String speaker_name = entry.getKey();
+     		//	 Double total_time_speaking = entry.getValue();
+     		//	 Double percentage = total_time_speaking / GroupCoupled.ElapsedTime;
+     		//	 System.out.println(speaker_name + "\t" + percentage + "\n");
+     		 //}
+     		 Double total_time = 0.0;
+     		 for (int i = 0; i < SpeakingTimes.size(); i++) {
+     			 System.out.println(SpeakingTimes.get(i).name + "\t" + SpeakingTimes.get(i).timeElapse + "\n");
+     			 total_time += SpeakingTimes.get(i).timeElapse;
+ 			 }
+     		 System.out.println("Total\t" + total_time + "\n");
+     		 //SpeakingTimes.forEach( (speaktime) -> { System.out.println(speaktime.name + "\t" + speaktime.timeElapse + "\n"); } );
+     	 }
+     }
+     
+     public static void showSpeakTimeRate() 
+     {
+     	 if(ElapsedTime > TotalTimeSim) {
+     		 System.out.println("Name\tSpeak rate");
+     		 double totalRate = 0.0, total_time_speaking = 0.0, percentage = 0.0;
+     		 for (Map.Entry<String, Double> entry : SpeakingTimeAccumulator.entrySet()) 
+     		 {
+     			 String speaker_name = entry.getKey();
+     			 total_time_speaking = entry.getValue();
+     			 percentage = total_time_speaking / ElapsedTime;
+     			 totalRate += percentage;
+     			 System.out.println(speaker_name + "\t" + percentage + "\n");
+     		 }
+     		 System.out.println("Total:" + "\t" + totalRate + "\n");
+     	 }
+     }
+     
+     public static void restoreMetrics(List<Person> group)
+     {
+    	 ElapsedTime = 0.0;
+    	 SpeakingTimes.clear();
+    	 SpeakingTimeAccumulator.clear();
+    	 initComunicationHz(group);
+     }
 }
