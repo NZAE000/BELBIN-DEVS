@@ -1,6 +1,9 @@
 package MyPackage;
 import view.modeling.ViewableDigraph;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,10 +31,10 @@ public class GroupCoupled extends ViewableDigraph {
 	private static ArrayList<SpeakingTime> SpeakingTimes 			 = new ArrayList<>();
 	
 	// ATRIBUTES #########################################################################
-    private List<Person> group               = new ArrayList<>();
-    private List<String> groupPersonalities  = new ArrayList<>();
-    private List<List<Object>> personalData  = null;
-    private Map<String, Double> additionalSpeakingTimes = new HashMap<>();
+    private List<Person> group               			 = new ArrayList<>();
+    private List<String> groupPersonalities  			 = new ArrayList<>();
+    private Map<String, Double> personalitySpeakingTimes = new HashMap<>();
+    private List<List<Object>> personalData  			 = null;
  
     // CONSTRUCTOR #######################################################################
     public GroupCoupled() {
@@ -40,19 +43,60 @@ public class GroupCoupled extends ViewableDigraph {
     }
 
     private void initializeModel() 
-    {	
-    	// Initialize personality combinations and time speak.
-    	initPersonalityTimeSpeak();
-    	
-    	// Read json.
-    	JSONReader jsonreader = new JSONReader();
-    	personalData = jsonreader.read(
-		    "Personas.json",
+    {
+    	readPersonalitySpeakingTime("input_data/speakingtime/test1.txt");
+    	readGroup("input_data/group/test1.json");
+    	initGroup();				// Initialize personality combinations and time speak.
+    	setPorts(); 				// Set in/out ports for all person atomic models.
+    	setCoupling(); 				// Establish coupling.
+        initInteractionHz(group); 	// Initialize matrix frecuency.
+        showInteractionHz();		// Show matrix frecuency.
+        
+        // Show all group personality and persons.
+        //for (int i = 0; i < numPerson; i++) {
+        	//System.out.println("Personalidades persona " + group.get(i).getName() + ": " + group.get(i).getgroupPersonalities().toString());
+        	//System.out.println("group " + group.get(i).getName() + ": " + group.get(i).getPersons().toString());
+        //}
+        //initialize();
+    }
+    
+// Helper methods ################################################################
+    
+    private void readPersonalitySpeakingTime(String path)
+    {
+    	// Read personality combinations.
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) continue;
+
+                String[] parts = line.split(",");
+                if (parts.length != 2) {
+                    System.out.println("Malformed line: " + line);
+                    continue;
+                }
+                personalitySpeakingTimes.put(parts[0], Double.parseDouble(parts[1]));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void readGroup(String path) 
+    {
+		// Read json.
+		JSONReader jsonreader = new JSONReader();
+		personalData = jsonreader.read(
+			path,
 		    Arrays.asList("nombre", "personalidad1", "personalidad2", "porcentaje1", "porcentaje2"),
 		    Arrays.asList(String.class, String.class, String.class, Double.class, Double.class)
 		);
-    	
-        int numPerson = GroupSize = personalData.size();
+    }
+    
+    private void initGroup()
+    {
+    	int numPerson = GroupSize = personalData.size();
         
         // Init all person atomic models.
         for (int i = 0; i < numPerson; i++) {
@@ -79,386 +123,8 @@ public class GroupCoupled extends ViewableDigraph {
             	groupPersonalities.add(personality2);
         }
         
-        // Set speak time for all persons
+        // Set speaking time for all persons.
         for (Person person : group) this.setSpeakingTimeOf(person);
-        
-        // Set in/out ports for all person atomic models.
-        for (Person person1 : group) {
-        	for (Person person2 : group) {
-                String personName = person2.getName();
-                if (!personName.equals(person1.getName())) {
-                	person1.addInport("Inport " + personName);
-                	person1.addOutport("Outport " + personName);
-                }
-            }
-        }
-        
-        // Show all group personality and persons.
-        //for (int i = 0; i < numPerson; i++) {
-        	//System.out.println("Personalidades persona " + group.get(i).getName() + ": " + group.get(i).getgroupPersonalities().toString());
-        	//System.out.println("group " + group.get(i).getName() + ": " + group.get(i).getPersons().toString());
-        //}
-        
-        // Initialize matrix frecuency.
-        initComunicationHz(group);
-        
-        // Show matrix frecuency.
-        showInteractionFrecuency();
-        
-        // Establish coupling.
-        for (int i = 0; i < numPerson; i++) {
-            for (int k = 0; k < numPerson; k++) {
-                if (i != k) {
-                    addCoupling(group.get(i), "Outport " + group.get(k).getName(), group.get(k), "Inport " + group.get(k).getName());
-                }
-            }
-        }
-        //initialize();
-    }
-    
-    private void initPersonalityTimeSpeak()
-    {
-    	// Initialize personality combinations.
-	    
-	    // 1
-	    /*
-	    additionalSpeakingTimes.put("Investigador de Recursos-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Finalizador ", 3.0);
-    	additionalSpeakingTimes.put("Cohesionador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Cohesionador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Cohesionador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Coordinador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Coordinador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Cerebro-Cohesionador", 2.0);
-	    additionalSpeakingTimes.put("Cerebro-Coordinador", 4.0);
-	    additionalSpeakingTimes.put("Cerebro-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Investigador de Recursos", 5.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Finalizador ", 3.0);
-	   	additionalSpeakingTimes.put("Especialista-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Especialista-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Especialista-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Impulsor-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Impulsor-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Implementador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Implementador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Finalizador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Finalizador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Finalizador ", 3.0);
-	    //*/
-	    
-	    // 2
-	    /*
-	    additionalSpeakingTimes.put("Investigador de Recursos-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Finalizador ", 3.0);
-    	additionalSpeakingTimes.put("Cohesionador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Cohesionador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Cohesionador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Coordinador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Coordinador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Cerebro-Cohesionador", 2.0);
-	    additionalSpeakingTimes.put("Cerebro-Coordinador", 4.0);
-	    additionalSpeakingTimes.put("Cerebro-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Investigador de Recursos", 5.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Finalizador ", 3.0);
-	   	additionalSpeakingTimes.put("Especialista-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Especialista-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Especialista-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Impulsor-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Impulsor-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Implementador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Implementador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Finalizador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Finalizador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Finalizador ", 3.0);
-	    //*/
-	    
-	    // 3
-	    /*
-	 	additionalSpeakingTimes.put("Investigador de Recursos-Investigador de Recursos", 1.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Cohesionador", 2.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Finalizador ", 3.0);
-    	additionalSpeakingTimes.put("Cohesionador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Cohesionador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Cohesionador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Coordinador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Coordinador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Cerebro-Cohesionador", 2.0);
-	    additionalSpeakingTimes.put("Cerebro-Coordinador", 4.0);
-	    additionalSpeakingTimes.put("Cerebro-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Investigador de Recursos", 5.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Finalizador ", 3.0);
-	   	additionalSpeakingTimes.put("Especialista-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Especialista-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Especialista-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Impulsor-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Impulsor-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Implementador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Implementador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Finalizador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Finalizador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Impulsor", 2.0);
-	    additionalSpeakingTimes.put("Finalizador-Implementador", 1.0);
-	    additionalSpeakingTimes.put("Finalizador-Finalizador ", 4.0); 
-	    //*/
-	    
-	    // 4
-	    ///*
-	    additionalSpeakingTimes.put("Investigador de Recursos-Investigador de Recursos", 1.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Cohesionador", 2.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Investigador de Recursos-Finalizador ", 3.0);
-    	additionalSpeakingTimes.put("Cohesionador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Cohesionador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Cohesionador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Cohesionador-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Coordinador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Coordinador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Coordinador-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Cerebro-Cohesionador", 2.0);
-	    additionalSpeakingTimes.put("Cerebro-Coordinador", 4.0);
-	    additionalSpeakingTimes.put("Cerebro-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Cerebro-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Investigador de Recursos", 5.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Monitor Evaluador-Finalizador ", 3.0);
-	   	additionalSpeakingTimes.put("Especialista-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Especialista-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Especialista-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Especialista-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Impulsor-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Impulsor-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Impulsor-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Implementador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Implementador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Impulsor", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Implementador", 3.0);
-	    additionalSpeakingTimes.put("Implementador-Finalizador ", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Investigador de Recursos", 2.0);
-	    additionalSpeakingTimes.put("Finalizador-Cohesionador", 1.0);
-	    additionalSpeakingTimes.put("Finalizador-Coordinador", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Cerebro", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Monitor Evaluador", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Especialista", 3.0);
-	    additionalSpeakingTimes.put("Finalizador-Impulsor", 2.0);
-	    additionalSpeakingTimes.put("Finalizador-Implementador", 1.0);
-	    additionalSpeakingTimes.put("Finalizador-Finalizador ", 4.0);
-	    //*/
     }
     
     private void setSpeakingTimeOf(Person person) 
@@ -472,20 +138,47 @@ public class GroupCoupled extends ViewableDigraph {
 	        String combination1 = personality1 + "-" + personality;
 	        String combination2 = personality2 + "-" + personality;
 
-	        if (additionalSpeakingTimes.containsKey(combination1)) {
-	            speakingTime += additionalSpeakingTimes.get(combination1);
+	        if (personalitySpeakingTimes.containsKey(combination1)) {
+	            speakingTime += personalitySpeakingTimes.get(combination1);
 	        }
-	        if (additionalSpeakingTimes.containsKey(combination2)) {
-	            speakingTime += additionalSpeakingTimes.get(combination2);
+	        if (personalitySpeakingTimes.containsKey(combination2)) {
+	            speakingTime += personalitySpeakingTimes.get(combination2);
 	        }
 	    }
 	    person.setTimeSpeak(speakingTime*avgPercentages);
 	    System.out.println("Speaking time of " + person.getName() + ": " + person.getTimeSpeak()); // Speaking time of Charlot: 36.300000000000004
 	}
     
+    private void setPorts() 
+    {
+    	// Set in/out ports for all person atomic models.
+        for (Person person1 : group) {
+        	for (Person person2 : group) {
+                String personName = person2.getName();
+                if (!personName.equals(person1.getName())) {
+                	person1.addInport("Inport " + personName);
+                	person1.addOutport("Outport " + personName);
+                }
+            }
+        }
+    }
+    
+    private void setCoupling() 
+    {
+    	// Establish coupling.
+        for (int i = 0; i < GroupSize; i++) {
+            for (int k = 0; k < GroupSize; k++) {
+                if (i != k) {
+                    addCoupling(group.get(i), "Outport " + group.get(k).getName(), group.get(k), "Inport " + group.get(k).getName());
+                }
+            }
+        }
+    }
+
+    
  // Metric methods ################################################################
     
-    public static void initComunicationHz(List<Person> group)
+    public static void initInteractionHz(List<Person> group)
     {
     	Frecuencies.clear();
     	int numPerson = GroupSize;
@@ -493,12 +186,12 @@ public class GroupCoupled extends ViewableDigraph {
         	String from = group.get(i).getName();
 			for (int j=0; j < numPerson; j++) {
 				String to = group.get(j).getName();
-				addComunicationHz(from, to, 0);
+				addInteractionHz(from, to, 0);
 			}
         }
     }
     
-    public static void addComunicationHz(String from, String to, int hz)
+    public static void addInteractionHz(String from, String to, int hz)
     {
     	if (!Frecuencies.containsKey(from))
     		Frecuencies.put(from, new HashMap<>());
@@ -515,7 +208,7 @@ public class GroupCoupled extends ViewableDigraph {
      	SpeakingTimeAccumulator.put(from, SpeakingTimeAccumulator.getOrDefault(from, 0.0) + speak_time_lapse);
      }
      
-     public static void showInteractionFrecuency()
+     public static void showInteractionHz()
      {
      	for (Map.Entry<String, Map<String, Integer>> entry : Frecuencies.entrySet()) {
              String name = entry.getKey();
@@ -578,6 +271,6 @@ public class GroupCoupled extends ViewableDigraph {
     	 ElapsedTime = 0.0;
     	 SpeakingTimes.clear();
     	 SpeakingTimeAccumulator.clear();
-    	 initComunicationHz(group);
+    	 initInteractionHz(group);
      }
 }

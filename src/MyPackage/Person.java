@@ -82,7 +82,7 @@ public class Person extends ViewableAtomic {
         if(GroupCoupled.ElapsedTime > GroupCoupled.TotalTimeSim) {
         	System.out.println("----------------------------------------");
         	passivate();
-        	GroupCoupled.showInteractionFrecuency();
+        	GroupCoupled.showInteractionHz();
         	GroupCoupled.showSpeakTime();
         	GroupCoupled.showSpeakTimeRate();
         	GroupCoupled.restoreMetrics(this.group);
@@ -143,7 +143,7 @@ public class Person extends ViewableAtomic {
                 mssge.add(makeContent(outPort, new entity("Take your turn to speak")));
                 generatedMessage = true;
                 
-                GroupCoupled.addComunicationHz(this.name, nextSpeakerName, 1); // FRECUENCY!.
+                GroupCoupled.addInteractionHz(this.name, nextSpeakerName, 1); // FRECUENCY!.
                 //showFrecuency();
             }   
         }
@@ -330,7 +330,8 @@ public class Person extends ViewableAtomic {
 	    return nameCompatiblePeoples;
 	}
 	
-	private List<String> getBestCompatibleNames(List<String> bestCompatibilities) {
+	private List<String> getBestCompatibleNames(List<String> bestCompatibilities) 
+	{
 	    List<String> bestCompatibleNames = new ArrayList<>();
 
 	    for (String element : bestCompatibilities) {

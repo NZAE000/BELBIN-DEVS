@@ -1,0 +1,81 @@
+Investigador de Recursos-Investigador de Recursos, 1.0
+Investigador de Recursos-Cohesionador, 2.0
+Investigador de Recursos-Coordinador, 3.0
+Investigador de Recursos-Cerebro, 3.0
+Investigador de Recursos-Monitor Evaluador, 3.0
+Investigador de Recursos-Especialista, 3.0
+Investigador de Recursos-Impulsor, 3.0
+Investigador de Recursos-Implementador, 3.0
+Investigador de Recursos-Finalizador, 3.0
+Cohesionador-Investigador de Recursos, 2.0
+Cohesionador-Cohesionador, 1.0
+Cohesionador-Coordinador, 3.0
+Cohesionador-Cerebro, 3.0
+Cohesionador-Monitor Evaluador, 3.0
+Cohesionador-Especialista, 3.0
+Cohesionador-Impulsor, 3.0
+Cohesionador-Implementador, 3.0
+Cohesionador-Finalizador, 3.0
+Coordinador-Investigador de Recursos, 2.0
+Coordinador-Cohesionador, 1.0
+Coordinador-Coordinador, 3.0
+Coordinador-Cerebro, 3.0
+Coordinador-Monitor Evaluador, 3.0
+Coordinador-Especialista, 3.0
+Coordinador-Impulsor, 3.0
+Coordinador-Implementador, 3.0
+Coordinador-Finalizador, 3.0
+Cerebro-Investigador de Recursos, 2.0
+Cerebro-Cohesionador, 2.0
+Cerebro-Coordinador, 4.0
+Cerebro-Cerebro, 3.0
+Cerebro-Monitor Evaluador, 3.0
+Cerebro-Especialista, 3.0
+Cerebro-Impulsor, 3.0
+Cerebro-Implementador, 3.0
+Cerebro-Finalizador, 3.0
+Monitor Evaluador-Investigador de Recursos, 5.0
+Monitor Evaluador-Cohesionador, 1.0
+Monitor Evaluador-Coordinador, 3.0
+Monitor Evaluador-Cerebro, 3.0
+Monitor Evaluador-Monitor Evaluador, 3.0
+Monitor Evaluador-Especialista, 3.0
+Monitor Evaluador-Impulsor, 3.0
+Monitor Evaluador-Implementador, 3.0
+Monitor Evaluador-Finalizador, 3.0
+Especialista-Investigador de Recursos, 2.0
+Especialista-Cohesionador, 1.0
+Especialista-Coordinador, 3.0
+Especialista-Cerebro, 3.0
+Especialista-Monitor Evaluador, 3.0
+Especialista-Especialista, 3.0
+Especialista-Impulsor, 3.0
+Especialista-Implementador, 3.0
+Especialista-Finalizador, 3.0
+Impulsor-Investigador de Recursos, 2.0
+Impulsor-Cohesionador, 1.0
+Impulsor-Coordinador, 3.0
+Impulsor-Cerebro, 3.0
+Impulsor-Monitor Evaluador, 3.0
+Impulsor-Especialista, 3.0
+Impulsor-Impulsor, 3.0
+Impulsor-Implementador, 3.0
+Impulsor-Finalizador, 3.0
+Implementador-Investigador de Recursos, 2.0
+Implementador-Cohesionador, 1.0
+Implementador-Coordinador, 3.0
+Implementador-Cerebro, 3.0
+Implementador-Monitor Evaluador, 3.0
+Implementador-Especialista, 3.0
+Implementador-Impulsor, 3.0
+Implementador-Implementador, 3.0
+Implementador-Finalizador, 3.0
+Finalizador-Investigador de Recursos, 2.0
+Finalizador-Cohesionador, 1.0
+Finalizador-Coordinador, 3.0
+Finalizador-Cerebro, 3.0
+Finalizador-Monitor Evaluador, 3.0
+Finalizador-Especialista, 3.0
+Finalizador-Impulsor, 2.0
+Finalizador-Implementador, 1.0
+Finalizador-Finalizador, 4.0
